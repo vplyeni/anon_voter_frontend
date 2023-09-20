@@ -1,8 +1,16 @@
 import React from 'react';
-import { Modal, Form, Input } from 'antd';
+import { Modal, Form, Input, Radio } from 'antd';
 
 
 function ProposeModal(props) {
+
+    const [value, setValue] = React.useState(1);
+
+    const options = [
+        { label: 'Yes No', value: 1 },
+        { label: 'One to Ten', value: 2 },
+      ];
+
     return (
         <Modal
         open={props.open}
@@ -26,8 +34,8 @@ function ProposeModal(props) {
         autoComplete="off"
        >
             <Form.Item
-                label="Propose"
-                name="propose"
+                label="Propose Topic"
+                name="topic"
                 rules={[
                     {
                     required: true,
@@ -36,6 +44,21 @@ function ProposeModal(props) {
                 ]}
                 >
                 <Input hint={"Please enter a proposal to VOTE!"} />
+            </Form.Item>
+
+            <Form.Item
+                label="Type"
+                name="type"
+                rules={[
+                    {
+                    required: true,
+                    message: 'Please choose a voting type!',
+                    },
+                ]}
+                >
+               <Radio.Group options={options} onChange={(res)=>{
+                    console.log(res);
+               }} value={value} />
             </Form.Item>
        </Form> 
     </Modal>

@@ -1,55 +1,74 @@
 import './App.css';
-import React from 'react';
-import { ethers } from 'ethers';
+import React, { useEffect } from 'react';
+
 import { Form } from 'antd';
-import { useVoter } from './hooks/useVoter';
+
 import Navbar from './components/Navbar/Navbar';
 import MiddleSection from './components/MiddleSection/MiddleSection';
+
 import GiveVotingPowerModal from './components/GiveVotingPowerModal/GiveVotingPowerModal';
-import { useKeyholder } from './hooks/useKeyholder';
 import ProposeModal from './components/ProposeModal/ProposeModal';
 
+import { useVoter } from './hooks/useVoter';
+import { useKeyholder } from './hooks/useKeyholder';
+
+import { batch, useDispatch , useSelector } from 'react-redux';
+import { setAccount, setAddress, setProposals, setProvider, setSigner } from './store/slices/dataSlice';
+
+import { ethers } from 'ethers';
+
 function App() {
-  const [currentVotings, setCurrentVotings] = React.useState(null);
-  const [totalVoterCount, setTotalVoterCount] = React.useState(0);
-  
-  const [account, setAccount] = React.useState(0);
-  const [provider, setProvider] = React.useState(null);
+
+  const provider = useSelector(state=>state.data.provider);;
+  const dispatch = useDispatch();
 
   const [openVotingPowerModal, setVotingPowerModal] = React.useState(false);
   const [openProposeModal, setProposeModal] = React.useState(false);
   
   const [form] = Form.useForm();
   const [propsalForm] = Form.useForm();
+
   const voterContract = useVoter();
   const keyholderContract = useKeyholder();
 
-  async function getCurrentVoting() {
-    voterContract?.getLastVotings(4).then((res) => {
-      setCurrentVotings(res);
-      voterContract?.totalVoterCount().then((res) => {
-        setTotalVoterCount(res);
-      });
-    });    
-  }
-  function connect() {
+  useEffect(()=>{
     if (typeof window.ethereum !== 'undefined') {
       const _provider = new ethers.providers.Web3Provider(window.ethereum);
-      setProvider(_provider);
-      _provider.send("eth_requestAccounts",[]).then(async (accounts) => {
-        setAccount(accounts[0]);
-        await getCurrentVoting();
-      }).catch((err) => {
-        console.log(err);
-      });
+      dispatch(setProvider(_provider));
+
     }else{
-      console.log('MetaMask is not installed!');
+      alert('MetaMask is not installed!');
+    }
+  },[]);
+
+  function connect() {
+    if (provider) {
+      provider
+        .send("eth_requestAccounts",[])
+        .then((accounts) => {
+          const signer = provider.getSigner();
+          signer.getAddress().then((address)=>{
+            batch(()=>{
+              dispatch(setAddress(address));
+              dispatch(setSigner(signer));
+              dispatch(setAccount(accounts[0]))
+            });
+          }).catch((err)=>{
+            console.log(err);
+          })
+        }).catch((err)=>{
+          console.log(err);
+        })
+
+    }else{
+      console.log("There is no provider");
     }
   }
+
   return (
     <div className="App">
-      <Navbar account={account} connect={connect} openVotingPowerModal={openVotingPowerModal} setVotingPowerModal={setVotingPowerModal} setProposeModal={setProposeModal}/>
-      <MiddleSection account={account} currentVoting={currentVotings} totalVoterCount={totalVoterCount} provider={provider} voterContract={voterContract} />
+      <Navbar openVotingPowerModal={openVotingPowerModal} setVotingPowerModal={setVotingPowerModal} openProposeModal={openProposeModal} setProposeModal={setProposeModal}/>
+      <MiddleSection voterContract={voterContract} />
       <GiveVotingPowerModal 
         onOk={()=>{
           form
@@ -64,7 +83,6 @@ function App() {
 
             setVotingPowerModal(false);
             form.resetFields();
-
           })
           .catch((info) => {
             console.log('Validate Failed:', info);
@@ -78,19 +96,20 @@ function App() {
       />
       <ProposeModal 
         onOk={()=>{
-          form
+          propsalForm
           .validateFields()
           .then((values) => {
             console.log(values);
-            keyholderContract?.giveVotingPower(values.address).then((res) => {
+            voterContract?.openProposal(values.type,values.topic)
+            .then((res) => {
               console.log(res);
-            }).catch((err) => {
+            })
+            .catch((err) => {
               console.log(err);
             });
 
             setProposeModal(false);
-            form.resetFields();
-
+            propsalForm.resetFields();
           })
           .catch((info) => {
             console.log('Validate Failed:', info);

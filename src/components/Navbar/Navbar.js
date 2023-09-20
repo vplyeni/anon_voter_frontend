@@ -28,7 +28,7 @@ function Navbar(props) {
         {props.account ?
           <Col className='colContainer' span={2}>
           <Button onClick={()=>{
-            props.setVotingPowerModal(!props.openVotingPowerModal);
+            props.setProposeModal(!props.openProposeModal);
           }} type='text' style={{bottom:3,width:'100%',height:'50px'}}>
             Propose
           </Button>

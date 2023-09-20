@@ -3,7 +3,7 @@ import React from 'react';
 import { Form, Input, Button } from 'antd';
 
 function GiveVotingPowerModal(props) {
-    console.log(props.open);
+    
     return (
         <Modal
             open={props.open}

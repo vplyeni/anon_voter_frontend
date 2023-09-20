@@ -103,7 +103,7 @@ export const KEYHOLDER_ABI = [
                 "type": "address"
             }
         ],
-        "name": "setContractAddress",
+        "name": "setVoterContractAddress",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -149,8 +149,64 @@ export const VOTER_ABI = [
             {
                 "indexed": true,
                 "internalType": "uint16",
+                "name": "proposalId",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topic",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint32",
+                "name": "voted",
+                "type": "uint32"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint32",
+                "name": "result",
+                "type": "uint32"
+            }
+        ],
+        "name": "ProposalEnded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint16",
+                "name": "proposalId",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topic",
+                "type": "string"
+            }
+        ],
+        "name": "ProposalStarted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint16",
                 "name": "voteId",
                 "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topic",
+                "type": "string"
             },
             {
                 "indexed": false,
@@ -176,6 +232,12 @@ export const VOTER_ABI = [
                 "internalType": "uint16",
                 "name": "voteId",
                 "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "topic",
+                "type": "string"
             }
         ],
         "name": "VotingStarted",
@@ -195,14 +257,26 @@ export const VOTER_ABI = [
         "type": "function"
     },
     {
-        "inputs": [],
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "id",
+                "type": "uint16"
+            }
+        ],
         "name": "closeProposal",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
     },
     {
-        "inputs": [],
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "id",
+                "type": "uint16"
+            }
+        ],
         "name": "closeVoting",
         "outputs": [],
         "stateMutability": "nonpayable",
@@ -211,12 +285,88 @@ export const VOTER_ABI = [
     {
         "inputs": [
             {
+                "internalType": "uint16",
+                "name": "skip",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint16",
+                "name": "take",
+                "type": "uint16"
+            }
+        ],
+        "name": "getProposals",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint16",
+                        "name": "id",
+                        "type": "uint16"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "topic",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint32",
+                        "name": "voted",
+                        "type": "uint32"
+                    },
+                    {
+                        "internalType": "uint32",
+                        "name": "result",
+                        "type": "uint32"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "proposer",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "blockNumberStarted",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "blockNumberWillNotEndBefore",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "blockNumberClosed",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "enum VoterContract.VotingType",
+                        "name": "proposalType",
+                        "type": "uint8"
+                    }
+                ],
+                "internalType": "struct VoterContract.Proposal[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "uint8",
-                "name": "limit",
+                "name": "skip",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint8",
+                "name": "take",
                 "type": "uint8"
             }
         ],
-        "name": "getLastVotings",
+        "name": "getVotings",
         "outputs": [
             {
                 "components": [
@@ -303,35 +453,17 @@ export const VOTER_ABI = [
     {
         "inputs": [
             {
+                "internalType": "enum VoterContract.VotingType",
+                "name": "_proposalType",
+                "type": "uint8"
+            },
+            {
                 "internalType": "string",
                 "name": "_topic",
                 "type": "string"
             }
         ],
         "name": "openProposal",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "enum VoterContract.VotingType",
-                "name": "_votingType",
-                "type": "uint8"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_votingDurationBasedBlockNumber",
-                "type": "uint256"
-            },
-            {
-                "internalType": "string",
-                "name": "_topic",
-                "type": "string"
-            }
-        ],
-        "name": "openVoting",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -344,6 +476,78 @@ export const VOTER_ABI = [
                 "internalType": "address",
                 "name": "",
                 "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "proposalId",
+        "outputs": [
+            {
+                "internalType": "uint16",
+                "name": "",
+                "type": "uint16"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "",
+                "type": "uint16"
+            }
+        ],
+        "name": "proposals",
+        "outputs": [
+            {
+                "internalType": "uint16",
+                "name": "id",
+                "type": "uint16"
+            },
+            {
+                "internalType": "string",
+                "name": "topic",
+                "type": "string"
+            },
+            {
+                "internalType": "uint32",
+                "name": "voted",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint32",
+                "name": "result",
+                "type": "uint32"
+            },
+            {
+                "internalType": "address",
+                "name": "proposer",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "blockNumberStarted",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "blockNumberWillNotEndBefore",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "blockNumberClosed",
+                "type": "uint256"
+            },
+            {
+                "internalType": "enum VoterContract.VotingType",
+                "name": "proposalType",
+                "type": "uint8"
             }
         ],
         "stateMutability": "view",
@@ -398,12 +602,17 @@ export const VOTER_ABI = [
     {
         "inputs": [
             {
+                "internalType": "uint16",
+                "name": "id",
+                "type": "uint16"
+            },
+            {
                 "internalType": "uint8",
                 "name": "vote",
                 "type": "uint8"
             }
         ],
-        "name": "useVotePowerONE_TEN",
+        "name": "useVotePowerOne2Ten",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -411,18 +620,46 @@ export const VOTER_ABI = [
     {
         "inputs": [
             {
-                "internalType": "enum VoterContract.NoYes",
+                "internalType": "uint16",
+                "name": "id",
+                "type": "uint16"
+            },
+            {
+                "internalType": "uint8",
                 "name": "vote",
                 "type": "uint8"
             }
         ],
-        "name": "useVotePowerProposal",
+        "name": "useVotePowerProposalOne2Ten",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
     },
     {
         "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "id",
+                "type": "uint16"
+            },
+            {
+                "internalType": "enum VoterContract.NoYes",
+                "name": "vote",
+                "type": "uint8"
+            }
+        ],
+        "name": "useVotePowerProposalYesNo",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "id",
+                "type": "uint16"
+            },
             {
                 "internalType": "enum VoterContract.NoYes",
                 "name": "vote",
