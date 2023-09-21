@@ -4,7 +4,7 @@ import './votingCard.css'
 import { useSelector } from 'react-redux';
 import { Button, Card, Divider, Row, Col, ConfigProvider, Slider } from 'antd';
 
-function VotingCard(props) {
+function ProposalCard(props) {
 
     let sliderValue = 10;
 
@@ -12,20 +12,20 @@ function VotingCard(props) {
     
     return (
         <Card style={{width:'100%', minHeight:'360px', backgroundColor:'#FCEBB6', border:false }}>
-                    <Divider>Voting Topic</Divider>
+                    <Divider>Proposal Topic</Divider>
                     <div>
-                        {props.voting?.topic}
+                        {props.proposal?.topic}
                     </div>
                     
                     <Divider>Voted</Divider>
                     <div>
-                        {props.voting?.voted}
+                        {props.proposal?.voted}
                     </div>
                     <Divider>Result</Divider>
-                    {props.voting?.votingType===1&&
+                    {props.proposal?.proposalType===1&&
                     <div>
                         <>
-                        Evet: {(props.voting?.result-props.voting?.voted)/9} | Hayır: {props.voting?.voted-((props.voting?.result-props.voting?.voted)/9)}
+                        Evet: {(props.proposal?.result-props.proposal?.voted)/9} | Hayır: {props.proposal?.voted-((props.proposal?.result-props.proposal?.voted)/9)}
                         </>
                         { account && props.amiVoter &&
                         <Row className='bottom' style={{marginTop:'15px'}} gutter={[10,10]} align={"middle"} justify={"center"}>
@@ -38,8 +38,8 @@ function VotingCard(props) {
                                     }}
                                 >
                                 <Button type="primary" onClick={()=>{
-                                    console.log("Voted id :",props.voting.id,"yes");
-                                    props.voterContract?.useVotePowerYesNo(props.voting.id,1).catch((err) => {
+                                    console.log("Voted id :",props.proposal.id,"yes");
+                                    props.voterContract?.useVotePowerProposalYesNo(props.proposal.id,1).catch((err) => {
                                         console.log(err);
                                     });
                                 }}>
@@ -56,8 +56,8 @@ function VotingCard(props) {
                                     }}
                                 >
                                 <Button type="primary" onClick={()=>{
-                                    console.log("Voted id :",props.voting.id,"no");
-                                    props.voterContract?.useVotePowerYesNo(props.voting.id,0).catch((err) => {
+                                    console.log("Voted id :",props.proposal.id,"no");
+                                    props.voterContract?.useVotePowerProposalYesNo(props.proposal.id,0).catch((err) => {
                                         console.log(err);
                                     });
                                 }}>
@@ -70,9 +70,9 @@ function VotingCard(props) {
                     </div>
                     }
                     
-                    {props.voting?.votingType===2&&
+                    {props.proposal?.proposalType===2&&
                     <div>
-                        Ortalama : {props.voting?.voted===0?0:(props.voting?.result/props.voting?.voted)}
+                        Ortalama : {props.proposal?.voted===0?0:(props.proposal?.result/props.proposal?.voted)}
                         {account&& props.amiVoter &&
                         <>
                         <Slider
@@ -92,7 +92,7 @@ function VotingCard(props) {
                                 <Button 
                                     type='primary' 
                                     onClick={()=>{
-                                        props.voterContract?.useVotePowerOne2Ten(props.voting.id,sliderValue).catch((err) => {
+                                        props.voterContract?.useVotePowerProposalOne2Ten(props.proposal.id,sliderValue).catch((err) => {
                                             console.log(err);
                                         });
                                     }}
@@ -106,15 +106,15 @@ function VotingCard(props) {
                     </div>
                     }
                     {
-                        props.voting?.votingType===0&&
+                        props.proposal?.proposalType===0&&
                         <>
-                            Average: {props.voting?.voted!==0?props.voting?.result/props.voting?.voted:0} /10
+                            Average: {props.proposal?.voted!==0?props.proposal?.result/props.proposal?.voted:0} /10
                         </>
                     }
                     {   
-                        props.voting?.votingType!==0&&props.amiVoter&&
+                        props.proposal?.proposalType!==0&&props.amiVoter&&
                         <Button className='bottomRight' onClick={()=>{
-                        props.voterContract?.closevoting(props.voting.id).catch((err) => {
+                        props.voterContract?.closeProposal(props.proposal.id).catch((err) => {
                             console.log(err);
                         });
                         }}>Close Voting</Button>
@@ -122,4 +122,4 @@ function VotingCard(props) {
                     
                 </Card>
     );
-}export default VotingCard;
+}export default ProposalCard;

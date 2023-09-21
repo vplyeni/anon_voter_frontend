@@ -1,9 +1,15 @@
 .middleContainer {
-    height: max-content;
-    width: 100%;
+    height: 100%;
+    width: calc(100% - 40px);
+
+    margin-left: 20px;
+    margin-right: 20px;
 
     align-items: center;
     justify-content: center;
+
+    background-color: #00000060;
+
 
     margin-top: 10px;
 }

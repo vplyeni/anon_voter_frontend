@@ -1,0 +1,12 @@
+.bottomRight {
+  position: absolute;
+  bottom: 15px;
+  right: 10px;
+}
+
+.bottom {
+  position: absolute;
+  right:0%;
+  left:0%;
+  bottom: 15px;
+}

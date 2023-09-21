@@ -9,17 +9,18 @@ import MiddleSection from './components/MiddleSection/MiddleSection';
 import GiveVotingPowerModal from './components/GiveVotingPowerModal/GiveVotingPowerModal';
 import ProposeModal from './components/ProposeModal/ProposeModal';
 
-import { useVoter } from './hooks/useVoter';
+import { useVoter , useVoterNoSigner} from './hooks/useVoter';
 import { useKeyholder } from './hooks/useKeyholder';
 
 import { batch, useDispatch , useSelector } from 'react-redux';
-import { setAccount, setAddress, setProposals, setProvider, setSigner } from './store/slices/dataSlice';
+import { setAccount, setProvider, setSigner, setAmIVoter, setHaveVotingPowerToGive,setTotalVoterCount, setVotingCount } from './store/slices/dataSlice';
 
 import { ethers } from 'ethers';
 
 function App() {
 
-  const provider = useSelector(state=>state.data.provider);;
+  const votingCount = useSelector(state=>state.data.votingCount);
+  const provider = useSelector(state=>state.data.provider);
   const dispatch = useDispatch();
 
   const [openVotingPowerModal, setVotingPowerModal] = React.useState(false);
@@ -29,33 +30,79 @@ function App() {
   const [propsalForm] = Form.useForm();
 
   const voterContract = useVoter();
+  const voterContractNoSigner = useVoterNoSigner();
   const keyholderContract = useKeyholder();
 
+  window.ethereum.on('accountsChanged',async (accounts) => {
+    console.log(accounts);
+    if(accounts.length>0){
+      console.log("chang1");
+      const amiVoter = await  voterContract?.amIVOTER();     
+      const haveVotingPowerToGive =  await keyholderContract?.amiVoter();
+      console.log("chang2");
+      dispatch(setAmIVoter(amiVoter));
+      dispatch(setHaveVotingPowerToGive(haveVotingPowerToGive));
+      dispatch(setAccount(accounts[0]));
+      console.log("change3");
+    }else{
+      console.log("chang5");
+      batch(()=>{
+        dispatch(setAmIVoter(false));
+        dispatch(setHaveVotingPowerToGive(false));
+        dispatch(setAccount(null));
+      })
+    }
+  });
+
   useEffect(()=>{
+    if(voterContractNoSigner&&votingCount===-1){
+      voterContractNoSigner?.voteId().then((res)=>{
+        console.log(res);
+        dispatch(setVotingCount(res));
+      }).catch((err)=>{
+        console.log(err);
+      });
+    }
+  },[voterContractNoSigner]);
+
+  useEffect(()=>{
+    console.log("useEffect1");
     if (typeof window.ethereum !== 'undefined') {
       const _provider = new ethers.providers.Web3Provider(window.ethereum);
-      dispatch(setProvider(_provider));
-
+      if(!provider){
+        const signer = _provider.getSigner();
+        console.log("signer",signer);
+        batch(()=>{
+          dispatch(setProvider(_provider));          
+        })
+        console.log("provider set",_provider);
+      }
     }else{
       alert('MetaMask is not installed!');
     }
   },[]);
 
   function connect() {
+    console.log("con",voterContractNoSigner);
     if (provider) {
       provider
         .send("eth_requestAccounts",[])
-        .then((accounts) => {
-          const signer = provider.getSigner();
-          signer.getAddress().then((address)=>{
-            batch(()=>{
-              dispatch(setAddress(address));
+        .then(async (accounts) => {
+          const signer = await provider.getSigner();
+          const address = signer.getAddress();
+          const amiVoter =  voterContract?.amIVOTER();     
+          const haveVotingPowerToGive =  keyholderContract?.amiVoter();
+
+          await Promise.all([amiVoter,address,haveVotingPowerToGive]).then((res)=>{
+            batch(() => {
+              dispatch(setAmIVoter(res[0]));
               dispatch(setSigner(signer));
-              dispatch(setAccount(accounts[0]))
+              dispatch(setAccount(accounts[0]));
+              dispatch(setHaveVotingPowerToGive(res[2]));
             });
-          }).catch((err)=>{
-            console.log(err);
-          })
+          });
+          console.log("Connected");
+
         }).catch((err)=>{
           console.log(err);
         })
@@ -67,16 +114,14 @@ function App() {
 
   return (
     <div className="App">
-      <Navbar openVotingPowerModal={openVotingPowerModal} setVotingPowerModal={setVotingPowerModal} openProposeModal={openProposeModal} setProposeModal={setProposeModal}/>
+      <Navbar connect={connect} openVotingPowerModal={openVotingPowerModal} setVotingPowerModal={setVotingPowerModal} openProposeModal={openProposeModal} setProposeModal={setProposeModal}/>
       <MiddleSection voterContract={voterContract} />
       <GiveVotingPowerModal 
         onOk={()=>{
           form
           .validateFields()
           .then((values) => {
-            console.log(values);
             keyholderContract?.giveVotingPower(values.address).then((res) => {
-              console.log(res);
             }).catch((err) => {
               console.log(err);
             });
@@ -99,11 +144,7 @@ function App() {
           propsalForm
           .validateFields()
           .then((values) => {
-            console.log(values);
             voterContract?.openProposal(values.type,values.topic)
-            .then((res) => {
-              console.log(res);
-            })
             .catch((err) => {
               console.log(err);
             });

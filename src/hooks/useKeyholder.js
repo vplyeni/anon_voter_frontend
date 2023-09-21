@@ -14,3 +14,15 @@ export const useKeyholder = () => {
 
     return keyholderContract;
 }
+
+export const useKeyholderNoSigner = () => {
+    const [keyholderContract, setKeyholderContract] = useState(null);
+
+    useEffect(() => {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const _contract = new ethers.Contract(KEYHOLDER_ADDRESS, KEYHOLDER_ABI, provider);
+        setKeyholderContract(_contract);
+    },[]);
+
+    return keyholderContract;
+}

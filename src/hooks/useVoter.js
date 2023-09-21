@@ -14,3 +14,15 @@ export const useVoter = () => {
 
     return voterContract;
 }
+
+export const useVoterNoSigner = () => {
+    const [voterContract, setVoterContract] = useState(null);
+
+    useEffect(() => {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const _contract = new ethers.Contract(VOTER_ADDRESS, VOTER_ABI, provider);
+        setVoterContract(_contract);
+    },[]);
+
+    return voterContract;
+}

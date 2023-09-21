@@ -3,12 +3,15 @@ import { createSlice } from '@reduxjs/toolkit'
 export const dataSlice = createSlice({
   name: 'data',
   initialState: {
+    amiVoter: false,
     provider: null,
     signer: null,
-    address: null,
     account: null,
-    votings: [],
-    proposals: []
+    votings: null,
+    proposals: null,
+    haveVotingPowerToGive: false,
+    votingCount:-1,
+    proposalCount:-1,
   },
   reducers: {
     setProvider: (state, action) => {
@@ -16,9 +19,6 @@ export const dataSlice = createSlice({
     },
     setSigner: (state, action) => {
         state.signer = action.payload
-    },
-    setAddress: (state, action) => {
-        state.address = action.payload
     },
     setVotings: (state, action) => {
       state.votings = action.payload
@@ -28,11 +28,25 @@ export const dataSlice = createSlice({
     },
     setAccount: (state, action) => {
       state.account = action.payload
+    },
+    setAmIVoter: (state, action) => {
+      state.amiVoter = action.payload
+    },
+    setTotalVoterCount: (state, action) => {
+      state.totalVoterCount = action.payload
+    },
+    setVotingCount: (state, action) => {
+      state.votingCount = action.payload
+    },
+    setProposalCount: (state, action) => {
+      state.proposalCount = action.payload
+    },
+    setHaveVotingPowerToGive: (state, action) => {
+      state.haveVotingPowerToGive = action.payload
     }
-    
   }
 })
 
-export const { setProvider , setSigner , setAddress, setVotings, setProposals, setAccount } = dataSlice.actions
+export const { setProvider , setSigner , setAddress, setVotings, setProposals, setAccount, setAmIVoter, setTotalVoterCount, setHaveVotingPowerToGive, setVotingCount, setProposalCount } = dataSlice.actions
 
 export default dataSlice.reducer
